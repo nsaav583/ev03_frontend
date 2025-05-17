@@ -1,40 +1,47 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import AddItem from '../components/AddItem';
 import ItemList from '../components/ItemList';
-import Button from '../components/Button';
 
 const Home = () => {
-  const [productos, setProductos] = useState([]);
-  const navigate = useNavigate();
+  const [items, setItems] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedItems = localStorage.getItem('shoppingCart');
+      return savedItems ? JSON.parse(savedItems) : [];
+    }
+    return [];
+  });
 
   useEffect(() => {
-    const guardados = JSON.parse(localStorage.getItem('productos')) || [];
-    setProductos(guardados);
-  }, []);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('shoppingCart', JSON.stringify(items));
+    }
+  }, [items]);
 
-  useEffect(() => {
-    localStorage.setItem('productos', JSON.stringify(productos));
-  }, [productos]);
-
-  const agregarProducto = (producto) => {
-    setProductos([...productos, producto]);
+  const handleAdd = (item) => {
+    setItems((prevItems) => {
+      const existingItem = prevItems.find((i) => i.id === item.id);
+      if (existingItem) {
+        return prevItems.map((i) =>
+          i.id === item.id ? { ...i, cantidad: i.cantidad + item.cantidad } : i
+        );
+      } else {
+        return [...prevItems, item];
+      }
+    });
   };
 
-  const eliminarProducto = (index) => {
-    const nuevos = [...productos];
-    nuevos.splice(index, 1);
-    setProductos(nuevos);
+  const handleDelete = (id) => {
+    setItems(prevItems => prevItems.filter(item => item.id !== id));
   };
 
   return (
-    <div>
-      <h1>Lista de Compras</h1>
-      <AddItem onAdd={agregarProducto} />
-      <ItemList productos={productos} onDelete={eliminarProducto} />
-      <Button onClick={() => navigate('/checkout')}>
-        Ir al resumen
-      </Button>
+    <div className="container mx-auto p-4 space-y-6">
+      <h1 className="text-3xl font-bold text-gray-800 text-center">Lista de Compras</h1>
+      <AddItem onAdd={handleAdd} />
+      <ItemList items={items} onDelete={handleDelete} />
+      <div className="text-center">
+        <a href="/checkout" className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-md focus:outline-none focus:shadow-outline">Ir al Checkout</a>
+      </div>
     </div>
   );
 };
