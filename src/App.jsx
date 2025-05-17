@@ -1,17 +1,16 @@
+import {createBrowserRouter, RouterProvider} from 'react-router-dom' ;
+import Home from './pages/Home' ;
+import Checkout from './pages/Checkout';
 import './App.css'
-import Button from './components/Button'
 
+const router = createBrowserRouter([
+  { path: "/", element: <Home />},
+  { path: "/checkout", element: <Checkout/>}
+
+]);
 function App() {
-  return (
-    <>
-<h1 class="text-3xl font-bold underline">
-  Hello world!
-</h1>
-<Button>
-  Guardar
-</Button>
-    </>
-  )
+  return <RouterProvider router={router} />;
+
 }
 
 export default App
